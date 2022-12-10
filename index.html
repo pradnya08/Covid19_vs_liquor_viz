@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Final project</title>
+    <style>
+        #container{
+             background-color: rgb(189, 206, 212);
+        }
+        .axis text{
+              font-size: xx-large;
+              font-family: Arial, Helvetica, sans-serif;
+        }
+        .title{
+            font-size: xx-large;
+            font-family: sans-serif;
+            margin: 50px;
+            color: rgb(171, 13, 13);
+
+        }
+        .clsquant{
+            stroke: #09aee0;
+            stroke-width: 15px;
+            fill: none;
+        }
+        text{
+            font-size: 45pt;
+        }
+        .anybutton {
+       top:11%;
+       left:80%;
+       width:100px;
+       height:40px;
+       position: absolute;
+       z-index: 2;
+       background: rgb(250, 250, 250); 
+       }
+.info {
+    position:absolute;
+    top:60%;
+    left: 65%;
+}
+</style>
+<script src="./lib/d3.js"></script>
+</head>
+<body>
+<div class="title">
+    ALCOHOL SALES AND IT'S EFFECT ON THE PANDEMIC
+</div>
+<div id="container">
+    <button class ="anybutton" onclick="document.location='bar-label-rotation.html'" >Alcohol sales charts</button>
+</div>
+<div class="info">This Line Chart depicts the employment in liquor stores from 1990 to 2020. From this visualization we can see a sharp increase in number of jobs at the end of 2019.
+</div>
+<script type="text/javascript">
+    d3.csv("./data/Employment_alc.csv",d=>(
+            {
+                date: new Date(d['DATE']),
+                quant:Number(d['QUANT'])
+            })
+    ).then(generateLineChart);
+    function generateLineChart(data){
+        const width=2000,height = 2000;
+        const margin =  {top:270,right:270,bottom:270,left:270};
+        const svg = d3.select("#container")
+            .append("svg")
+            .attr("viewBox",`0 0 ${width} ${height}`)
+            .attr("width","50vw")
+            .attr("height","40vw");
+        console.log(data)
+        const date_min_max = d3.extent(data,d=>d.date)
+        const quant_min=d3.min(data,d=>d.quant)
+        const quant_max=d3.max(data,d=>d.quant)
+        const quant_min_max = [quant_min,quant_max]
+        const xScale=d3.scaleTime()
+                     .domain(date_min_max)
+                     .range([margin.left,2000-margin.right])
+
+        const yScale=d3.scaleLinear()
+                     .domain(quant_min_max)
+                     .range([2000-margin.bottom,margin.top])
+    
+        const xAxis=d3.axisBottom().scale(xScale)
+        const yAxis=d3.axisLeft().scale(yScale)
+        
+
+        svg.append('g').attr("class","axis")
+        .attr(`transform`,`translate(0,${height-margin.bottom})`)
+        .call(xAxis)
+
+        svg.append("text")
+		.attr("transform", `translate(850,${height-80})`)
+        .style("font-size","80px")
+		.style("fill", "black")
+		.text("Year");
+
+        svg.append('g').attr("class","axis")
+        .attr(`transform`,`translate(${margin.left}, 0)`)
+        .call(yAxis)
+
+        svg.append("text")
+		.attr("transform", `translate(-220,${height-930})`)
+        .style("font-size","80px")
+		.style("fill", "black")
+		.text("No. of jobs");
+
+        svg.append("text")
+		.attr("transform", `translate(-220,${height-860})`)
+        .style("font-size","80px")
+		.style("fill", "black")
+		.text("(1000s)");
+        
+        const Linegen= d3.line().x(d=>xScale(d.date)).y(d=>yScale(d.quant))
+
+        const Linemark= svg.append("g").attr("class","clsquant");
+        Linemark.selectAll(`lines`)
+        .data([data])
+        .enter()
+        .append("path")
+        .attr("d",d=>Linegen(d))
+
+    }
+  </script>
+</body>
+</html>
